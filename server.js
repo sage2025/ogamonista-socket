@@ -141,11 +141,29 @@ io.on('connection', (socket) => {
 
     /* gameplay */ 
     //joinroom: when two players join each other and then start new game
-    socket.on('start_game_room', (name, callback) => {
-        socket.join(name);
-
+    socket.on('start_game_room', (room, callback) => {
+        // socket.join(room);
+        // var num = io.sockets.clients('Earl')
+        // console.log(io.sockets.adapter, "num")
         callback();
     } )
+
+    socket.on('ready_game', room => {
+        socket.join(room);
+        io.of('/').in('sage').clients(function(err, cli) { 
+            let firstdiceA = Math.floor(Math.random() * 3) + 1;
+            let firstdiceB = Math.floor(Math.random() * 3) + 1;
+            if(firstdiceA === firstdiceB) {
+                if(firstdiceA === 6)
+                    firstdiceA--;
+                else
+                    firstdiceA++;
+            }
+            if(cli.length > 1)
+                io.to('sage').emit('firstdice', {firstdiceA : firstdiceA + 3, firstdiceB : firstdiceB});
+            console.log(cli.length, "l")
+        })
+    })
 
     socket.on('finish_game_room', ({roomID : roomID, winner: winner, loser: loser}, callback) => {
         // socket.join(name);
@@ -166,23 +184,22 @@ io.on('connection', (socket) => {
     } )
 
     socket.on('rolldice', (states, callback) => {
-        io.to('sage').emit('rolldice_fe', states);
+        socket.broadcast.to('sage').emit('rolldice_fe', states);
         callback();
     })
 
     socket.on('dicemove', (states, callback) => {
-        io.to('sage').emit('dicemove_fe', states);
+            socket.broadcast.to('sage').emit('dicemove_fe', states);
         callback();
     })
 
     socket.on('undo', (states, callback) => {
-        io.to('sage').emit('undo_fe', states);
+        socket.broadcast.to('sage').emit('undo_fe', states);
         callback();
     })
 
     socket.on('setstore', (states, callback) => {
         io.to('game').emit('getstore', states);
-        console.log(states)
         callback();
     })
 
