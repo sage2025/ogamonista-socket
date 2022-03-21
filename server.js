@@ -15,31 +15,31 @@ const User = require("./models/User");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require ('./socket.js');
 
-const PORT = process.env.PORT || 443;  
-const router = require('./router'); 
+const PORT = process.env.PORT || 8000;  
+// const router = require('./router'); 
 const app = require('express')();
 // const http = require('http').Server(app);
 
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
+// const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
+// const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
+// const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
 
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
+// const credentials = {
+// 	key: privateKey,
+// 	cert: certificate,
+// 	ca: ca
+// };
 
 // const app = express();
 
-// const server = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
-const io = socketio(httpsServer);  //this is an instance of the socketio
+const server = http.createServer(app);
+// const httpsServer = https.createServer(credentials, app);
+const io = socketio(server);  //this is an instance of the socketio
 
 // app.use(router);
 var corsOptions = {
-    // origin: "http://localhost:3000",
-    origin: "https://williamwehby.com.br",
+    origin: "http://localhost:3000",
+    // origin: "https://williamwehby.com.br",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -65,7 +65,7 @@ app.use("/api/users", users);
 io.on('connection', (socket) => {
     socket.on('join', ({nameA, nameB, room}, callback) => {
         const { user, error } = addUser({ id: socket.id, nameA, room}); //add user function can only return 2 things a user with error property or user property
-        
+
         if(error) return callback(error); //error handeling
         //no errors
         //emit an event from the backend to the front end with a payload in {} part
@@ -123,7 +123,6 @@ io.on('connection', (socket) => {
     //gets an event from the front end, frontend emits the msg, backends receives it
     socket.on('sendMessage', (message, callback) =>{
         const user = getUser(socket.id); 
-        console.log(message, user)
         //when the user leaves new message to roomData
         //send users since need to know the new state of the users in the room
         io.to(user.room).emit('message', { user: user.name, text: message });
@@ -159,6 +158,8 @@ io.on('connection', (socket) => {
                 else
                     firstdiceA++;
             }
+            if(firstdiceA > 3)
+                firstdiceA--;
             if(cli.length > 1)
                 io.to('sage').emit('firstdice', {firstdiceA : firstdiceA + 3, firstdiceB : firstdiceB});
             console.log(cli.length, "l")
@@ -189,7 +190,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('dicemove', (states, callback) => {
-            socket.broadcast.to('sage').emit('dicemove_fe', states);
+            io.to('sage').emit('dicemove_fe', states);
         callback();
     })
 
@@ -212,4 +213,4 @@ io.on('connection', (socket) => {
 
 })
 
-httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
