@@ -36,8 +36,8 @@ router.get("/userdata", (req, res) => {
   })
 })
 router.get("/getCurUser/:account", ( req, res ) => {
-  // res.setHeader('Access-Control-Allow-Origin', "https://williamwehby.com.br");
-  res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
+  res.setHeader('Access-Control-Allow-Origin', "https://williamwehby.com.br");
+  // res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
