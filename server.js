@@ -190,7 +190,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('dicemove', (states, callback) => {
-            io.to('sage').emit('dicemove_fe', states);
+        socket.broadcast.to('sage').emit('dicemove_fe', states);
         callback();
     })
 
