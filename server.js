@@ -150,19 +150,16 @@ io.on('connection', (socket) => {
     socket.on('ready_game', room => {
         socket.join(room);
         io.of('/').in('sage').clients(function(err, cli) { 
-            let firstdiceA = Math.floor(Math.random() * 3) + 1;
-            let firstdiceB = Math.floor(Math.random() * 3) + 1;
+            let firstdiceA = Math.floor(Math.random() * 5) + 1;
+            let firstdiceB = Math.floor(Math.random() * 5) + 1;
             if(firstdiceA === firstdiceB) {
                 if(firstdiceA === 6)
                     firstdiceA--;
                 else
                     firstdiceA++;
             }
-            if(firstdiceA > 3)
-                firstdiceA--;
             if(cli.length > 1)
-                io.to('sage').emit('firstdice', {firstdiceA : firstdiceA + 3, firstdiceB : firstdiceB});
-            console.log(cli.length, "l")
+                io.to('sage').emit('firstdice', {firstdiceA : firstdiceA, firstdiceB : firstdiceB});
         })
     })
 
